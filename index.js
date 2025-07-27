@@ -13,14 +13,20 @@ connectDB();
 const app=express();
 
 const PORT=process.env.PORT || 3000;
-const allowedOrigins = [
-    "http://localhost:5173",
-    "https://lmslearnings.netlify.app" // replace with your actual frontend URL
-  ];
-  app.use(cors({
-    origin: allowedOrigins,
-    credentials: true
-  }));
+const allowedOrigins = process.env.FRONTEND_URLS.split(",");
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // allow Postman or server-to-server requests
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
+
 //default middleware
 app.use(express.json());
 app.use(cookieParser());
